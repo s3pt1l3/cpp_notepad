@@ -26,7 +26,7 @@ void MainWindow::on_actionOpen_triggered()
     QString filename = QFileDialog::getOpenFileName(this, "Open the file");
     QFile file(filename);
     current_file = filename;
-    if(!file.open(QIODevice::ReadOnly | QFile::Text))
+    if (!file.open(QIODevice::ReadOnly | QFile::Text))
     {
         QMessageBox::warning(this, "Warning", "Cannot open file: " + file.errorString());
         return;
@@ -42,7 +42,7 @@ void MainWindow::on_actionSave_triggered()
 {
     QString filename = QFileDialog::getSaveFileName(this, "Save as");
     QFile file(filename);
-    if(!file.open(QFile::WriteOnly | QFile::Text))
+    if (!file.open(QFile::WriteOnly | QFile::Text))
     {
         QMessageBox::warning(this, "Warning", "Cannot save file: " + file.errorString());
         return;
@@ -53,5 +53,23 @@ void MainWindow::on_actionSave_triggered()
     QString text = ui->textEdit->toPlainText();
     out << text;
     file.close();
+}
+
+void MainWindow::on_actionPrint_triggered()
+{
+    QPrinter printer;
+    printer.setPrinterName("Printer Name");
+    QPrintDialog pDialog(&printer, this);
+    if (pDialog.exec() == QDialog::Rejected)
+    {
+        QMessageBox::warning(this, "Warning", "Cannot access printer");
+        return;
+    }
+    ui->textEdit->print(&printer);
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    QApplication::quit();
 }
 
