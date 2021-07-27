@@ -24,35 +24,41 @@ void MainWindow::on_actionNew_triggered()
 void MainWindow::on_actionOpen_triggered()
 {
     QString filename = QFileDialog::getOpenFileName(this, "Open the file");
-    QFile file(filename);
-    current_file = filename;
-    if (!file.open(QIODevice::ReadOnly | QFile::Text))
+    if (!filename.isEmpty() && !filename.isNull())
     {
-        QMessageBox::warning(this, "Warning", "Cannot open file: " + file.errorString());
-        return;
+        QFile file(filename);
+        current_file = filename;
+        if (!file.open(QIODevice::ReadOnly | QFile::Text))
+        {
+            QMessageBox::warning(this, "Warning", "Cannot open file: " + file.errorString());
+            return;
+        }
+        setWindowTitle("Notepad - " + filename);
+        QTextStream in(&file);
+        QString text = in.readAll();
+        ui->textEdit->setText(text);
+        file.close();
     }
-    setWindowTitle("Notepad - " + filename);
-    QTextStream in(&file);
-    QString text = in.readAll();
-    ui->textEdit->setText(text);
-    file.close();
 }
 
 void MainWindow::on_actionSave_triggered()
 {
     QString filename = QFileDialog::getSaveFileName(this, "Save as");
-    QFile file(filename);
-    if (!file.open(QFile::WriteOnly | QFile::Text))
+    if (!filename.isEmpty() && !filename.isNull())
     {
-        QMessageBox::warning(this, "Warning", "Cannot save file: " + file.errorString());
-        return;
+        QFile file(filename);
+        if (!file.open(QFile::WriteOnly | QFile::Text))
+        {
+            QMessageBox::warning(this, "Warning", "Cannot save file: " + file.errorString());
+            return;
+        }
+        current_file = filename;
+        setWindowTitle(filename);
+        QTextStream out(&file);
+        QString text = ui->textEdit->toPlainText();
+        out << text;
+        file.close();
     }
-    current_file = filename;
-    setWindowTitle(filename);
-    QTextStream out(&file);
-    QString text = ui->textEdit->toPlainText();
-    out << text;
-    file.close();
 }
 
 void MainWindow::on_actionPrint_triggered()
@@ -62,7 +68,7 @@ void MainWindow::on_actionPrint_triggered()
     QPrintDialog pDialog(&printer, this);
     if (pDialog.exec() == QDialog::Rejected)
     {
-        QMessageBox::warning(this, "Warning", "Cannot access printer");
+        //QMessageBox::warning(this, "Warning", "Cannot access printer");
         return;
     }
     ui->textEdit->print(&printer);
